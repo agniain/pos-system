@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { REGISTER_USER } from '../graphql/mutations';
 import bcrypt from 'bcryptjs';
 
@@ -101,6 +101,10 @@ const SignUp = () => {
                 Sign Up
               </button>
             </form>
+              <p className="mt-5 mb-3 flex justify-center">Have an account?</p>
+              <Link to='/login' className="flex justify-center text-black hover:bg-lime-200">
+                Login
+              </Link>           
             {loading && <p>Loading...</p>}
             {error && <p>Error: {error.message}</p>}
           </div>

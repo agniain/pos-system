@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_ORDER_HISTORY } from '../graphql/queries';
 import { format, startOfDay, endOfDay } from 'date-fns';
@@ -8,13 +8,21 @@ const OrderHistory = () => {
   const today = new Date();
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
+  const [variables, setVariables] = useState({
+    startDate: startOfDay(today).toISOString(),
+    endDate: endOfDay(today).toISOString(),
+  });
 
   const { data, loading, error } = useQuery(GET_ORDER_HISTORY, {
-    variables: {
-      startDate: startOfDay(today).toISOString(),
-      endDate: endOfDay(today).toISOString(),
-    },
+    variables,
   });
+
+  useEffect(() => {
+    setVariables({
+      startDate: startOfDay(startDate).toISOString(),
+      endDate: endOfDay(endDate).toISOString(),
+    });
+  }, [startDate, endDate]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
@@ -43,7 +51,8 @@ const OrderHistory = () => {
       <table className="min-w-full border-collapse">
         <thead>
           <tr className="bg-lime-600 text-white">
-          <th className="border p-2">No</th>
+            <th className="border p-2">No</th>
+            <th className="border p-2">Date</th>
             <th className="border p-2">Order ID</th>
             <th className="border p-2">Name</th>
             <th className="border p-2">Price</th>
@@ -55,6 +64,9 @@ const OrderHistory = () => {
           {data.orders.map((order, index) => (
             <tr key={order.id}>
               <td className="border p-2 border-lime-700">{index + 1}</td>
+              <td className="border p-2 border-lime-700">
+                {format(new Date(order.order_date), 'dd/MM/yyyy')}
+              </td>
               <td className="border p-2 border-lime-700">{order.id}</td>
               <td className="border p-2 border-lime-700">
                 {order.order_details.map((product) => (

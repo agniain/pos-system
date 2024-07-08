@@ -93,12 +93,15 @@ export const ADD_TO_CART = gql`
 
 export const REMOVE_FROM_CART = gql`
   mutation RemoveFromCart($_eq: Int) {
-    delete_cart(where: {id: {_eq: $_eq}}) {
+    delete_cart_product(where: {id: {_eq: $_eq}}) {
       affected_rows
       returning {
+        product_id
         id
-        name
         quantity
+        product {
+          name
+        }
       }
     }
   }

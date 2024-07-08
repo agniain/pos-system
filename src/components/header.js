@@ -1,7 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link} from "react-router-dom";
 import Layout from "./header-bg";
+import useAuth from "../config";
 
 const Header = () => {
+    const { authToken } = useAuth();
+
     return (
         <Layout>
             <div className="w-full lg:w-1/2 h-full pt-20 lg:pt-40 pb-10 lg:pb-20">
@@ -12,10 +15,22 @@ const Header = () => {
                 <p className="text-lime-900 ml-4 lg:ml-10 mb-5 font-semibold text-lg lg:text-xl">
                     Make your own customized POS System!
                 </p>
-                <div className="flex justify-center">
-                    <Link to='/register' className="bg-lime-700 text-white p-2 hover:bg-lime-500">
-                        Get Started
-                    </Link>
+                <div>
+                    {authToken ? (
+                    <>
+                    <div className="flex justify-center">
+                        <Link to='/order' className="bg-lime-700 text-white p-2 hover:bg-lime-500">
+                            Get Started
+                        </Link>
+                    </div>
+                    </>
+                    ) : (
+                    <div className="flex justify-center">
+                        <Link to='/register' className="bg-lime-700 text-white p-2 hover:bg-lime-500">
+                            Get Started
+                        </Link>
+                    </div>
+                    )}
                 </div>    
             </div>
         </Layout> 

@@ -1,19 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_PRODUCT_SALES_AND_STOCK } from '../graphql/queries';
 import { format, startOfDay, endOfDay } from 'date-fns';
 
 const DailyProduct = () => {
   const today = new Date();
-  const [startDate, setStartDate] = useState(today);
-  const [endDate, setEndDate] = useState(today);
+  const [startDate, setStartDate] = useState(startOfDay(today));
+  const [endDate, setEndDate] = useState(endOfDay(today));
+  const [variables, setVariables] = useState({
+    startDate: startOfDay(today).toISOString(),
+    endDate: endOfDay(today).toISOString(),
+  });
 
   const { data, loading, error } = useQuery(GET_PRODUCT_SALES_AND_STOCK, {
-    variables: {
-      startDate: startOfDay(today).toISOString(),
-      endDate: endOfDay(today).toISOString(),
-    },
+    variables,
   });
+
+  useEffect(() => {
+    setVariables({
+      startDate: startOfDay(startDate).toISOString(),
+      endDate: endOfDay(endDate).toISOString(),
+    });
+  }, [startDate, endDate]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;

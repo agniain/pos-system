@@ -60,7 +60,7 @@ export const GET_TOTAL_CART_PRICE = gql`
 
 export const GET_ORDER_HISTORY = gql`
   query GetOrderHistory($startDate: timestamptz, $endDate: timestamptz) {
-    orders(where: { order_date: { _gte: $startDate, _lte: $endDate } }) {
+    orders(where: {order_date: {_gte: $startDate, _lte: $endDate}}) {
       id
       order_details {
         product {
@@ -69,6 +69,7 @@ export const GET_ORDER_HISTORY = gql`
         }
         quantity
       }
+      order_date
     }
   }
 `;
