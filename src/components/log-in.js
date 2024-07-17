@@ -35,7 +35,23 @@ const LogIn = ({ setAuthToken }) => {
             setAuthToken(token);
             localStorage.setItem('authToken', token);
             localStorage.setItem('username', formData.username);
-            navigate('/order');
+            localStorage.setItem('role', user.role);
+            
+            // Redirect based on role
+            switch (user.role) {
+              case 'admin':
+                navigate('/order');
+                break;
+              case 'inventory':
+                navigate('/product');
+                break;
+              case 'cashier':
+                navigate('/order');
+                break;
+              default:
+                navigate('/');
+                break;
+            }
           } else {
             alert('Invalid credentials');
           }

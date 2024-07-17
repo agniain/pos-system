@@ -11,7 +11,8 @@ import Login from './pages/log-in-page';
 import ProductOrder from './pages/product-order';
 import History from './pages/daily-order-history';
 import Report from './pages/report';
-import DailySoldProduct from './pages/daily-sold-product';
+import ProfilePage from './pages/profile-page';
+import ProductPage from './pages/product-page';
 
 const router = createBrowserRouter([
   {
@@ -35,13 +36,17 @@ const router = createBrowserRouter([
     element: <History />,
   },
   {
-    path: "/daily-product",
-    element: <DailySoldProduct />,
+    path: "/product",
+    element: <ProductPage />,
   },
   {
     path: "/report",
     element: <Report />,
   },
+  {
+    path: "/profile",
+    element: <ProfilePage />,
+  }
 ]);
 
 createRoot(document.getElementById('root')).render(

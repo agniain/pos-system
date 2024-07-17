@@ -2,25 +2,17 @@ import React, { useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { GET_PRODUCTS } from '../graphql/queries';
-import { ADD_PRODUCT, ADD_AND_CREATE_CART, ADD_TO_CART, UPDATE_CART_ITEM_QUANTITY } from '../graphql/mutations';
+import { ADD_AND_CREATE_CART, ADD_TO_CART, UPDATE_CART_ITEM_QUANTITY } from '../graphql/mutations';
 
 const ProductSection = ({ refetchCart, refetchTotalCartPrice, cartData }) => {
-  const [newProduct, setNewProduct] = useState({ name: '', price: '', stock: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: productsData, refetch } = useQuery(GET_PRODUCTS, {
+  const { data: productsData } = useQuery(GET_PRODUCTS, {
     variables: { limit: 9, offset: (currentPage - 1) * 9 },
   });
 
   const totalPages = productsData ? Math.ceil(productsData.products_aggregate.aggregate.count / 9) : 1;
-
-  const [addProduct] = useMutation(ADD_PRODUCT, {
-    onCompleted: () => {
-      setNewProduct({ name: '', price: '', stock: '' });
-      refetch();
-    },
-  });
 
   const [createCartAndAddProduct] = useMutation(ADD_AND_CREATE_CART, {
     onCompleted: () => {
@@ -45,17 +37,6 @@ const ProductSection = ({ refetchCart, refetchTotalCartPrice, cartData }) => {
       console.log('Product quantity updated');
     },
   });
-
-  const handleAddProduct = (e) => {
-    e.preventDefault();
-    addProduct({
-      variables: {
-        name: newProduct.name,
-        price: parseFloat(newProduct.price),
-        stock: parseInt(newProduct.stock, 10),
-      },
-    });
-  };
 
   const handleAddToCart = (product) => {
     if (cartData?.cart.length) {
@@ -143,35 +124,7 @@ const ProductSection = ({ refetchCart, refetchTotalCartPrice, cartData }) => {
         >
           Next
         </button>
-      </div>
-      <p className="mt-10 mb-7 border-t pt-5 text-xl text-amber-900 font-bold">Add New Products Here</p>
-      <form onSubmit={handleAddProduct} className="mb-6 grid grid-cols-4">
-        <input
-          type="text"
-          value={newProduct.name}
-          onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-          placeholder="Name"
-          className="border p-1 mr-1"
-          required
-        />
-        <input
-          type="number"
-          value={newProduct.price}
-          onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-          placeholder="Price"
-          className="border p-1 mr-1"
-          required
-        />
-        <input
-          type="number"
-          value={newProduct.stock}
-          onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
-          placeholder="Stock"
-          className="border p-1 mr-1"
-          required
-        />
-        <button type="submit" className="bg-amber-700 text-sm text-white p-2 hover:bg-orange-600">Add Product</button>
-      </form>
+      </div>     
     </div>
   );
 };

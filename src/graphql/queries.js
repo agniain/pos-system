@@ -6,6 +6,9 @@ export const GET_USER = gql`
       id
       username
       password
+      full_name
+      email
+      role
     }
   }
 `
@@ -57,11 +60,14 @@ export const GET_TOTAL_CART_PRICE = gql`
   }
 `;
 
-
 export const GET_ORDER_HISTORY = gql`
   query GetOrderHistory($startDate: timestamptz, $endDate: timestamptz) {
     orders(where: {order_date: {_gte: $startDate, _lte: $endDate}}) {
       id
+      order_date
+      user {
+        full_name
+      }
       order_details {
         product {
           name
@@ -69,25 +75,21 @@ export const GET_ORDER_HISTORY = gql`
         }
         quantity
       }
-      order_date
     }
   }
 `;
 
-
 export const GET_PRODUCT_SALES_AND_STOCK = gql`
-  query GetProductSalesAndStock($startDate: timestamptz, $endDate: timestamptz) {
-    orders(where: { order_date: { _gte: $startDate, _lte: $endDate } }) {
-      order_details {
-        product_id
-        product {
-          id
-          name
-          price
-          stock
-        }
-        quantity
-      }
+  query GetAllProductsWithQuantity {
+    products (order_by: {name: asc}) {
+      id
+      name
+      price
+      stock
+    }
+    order_detail {
+      product_id
+      quantity
     }
   }
 `;
@@ -118,7 +120,6 @@ export const GET_All_SOLD_PRODUCTS = gql`
     }
   }
 `
-
 
 export const GET_DAILY_INCOME = gql`
   query MyQuery ($startDate: date, $endDate: date) {

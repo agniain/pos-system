@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMutation } from '@apollo/client';
 import { CREATE_ORDER, MOVE_CART_TO_ORDER_DETAIL, REMOVE_FROM_CART } from '../graphql/mutations';
 
-const CartSection = ({ cartData, totalCartPriceData, refetchCart, refetchTotalCartPrice }) => {
+const CartSection = ({ cartData, totalCartPriceData, refetchCart, refetchTotalCartPrice, user }) => {
   const [orderId, setOrderId] = useState(null);
 
   useEffect(() => {
@@ -11,8 +11,7 @@ const CartSection = ({ cartData, totalCartPriceData, refetchCart, refetchTotalCa
   }, [refetchCart, refetchTotalCartPrice]);
 
   const totalCartPrice = totalCartPriceData?.cart_with_total_price_aggregate?.aggregate?.sum?.total_cart_price;
-  console.log(totalCartPrice);
-  
+
   const [removeFromCart] = useMutation(REMOVE_FROM_CART, {
     onCompleted: () => {
       refetchCart();
@@ -41,7 +40,11 @@ const CartSection = ({ cartData, totalCartPriceData, refetchCart, refetchTotalCa
   };
 
   const handleCreateOrder = () => {
-    createOrder();
+    if (user && user.id) {
+      createOrder({ variables: { user_id: user.id } });
+    } else {
+      console.error('User data is not available');
+    }
   };
 
   const handleCompleteOrder = () => {

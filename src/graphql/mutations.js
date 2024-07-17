@@ -2,14 +2,26 @@ import { gql } from '@apollo/client';
 
 
 export const REGISTER_USER = gql`
-  mutation RegisterUser($full_name: String!, $username: String!, $email: String!, $password: String!) {
-    insert_users(objects: { full_name: $full_name, username: $username, email: $email, password: $password }) {
+  mutation RegisterUser($full_name: String!, $username: String!, $email: String!, $password: String! $role: String!) {
+    insert_users(objects: { full_name: $full_name, username: $username, email: $email, password: $password role: $role}) {
       returning {
         id
         full_name
         username
         email
       }
+    }
+  }
+`;
+
+export const UPDATE_USER_PROFILE = gql`
+  mutation UpdateUserProfile($id: Int!, $full_name: String!, $email: String!, $username: String!) {
+    update_users_by_pk(pk_columns: { id: $id }, _set: { full_name: $full_name, email: $email, username: $username }) {
+      id
+      full_name
+      email
+      username
+      role
     }
   }
 `;
@@ -29,13 +41,13 @@ export const ADD_PRODUCT = gql`
 
 export const UPDATE_PRODUCT = gql`
   mutation UpdateProduct($stock: Int, $name: String, $price: numeric, $id: Int!) {
-  update_products_by_pk(pk_columns: {id: $id}, _set: {name: $name, stock: $stock, price: $price}) {
-    name
-    price
-    stock
-    id
+    update_products_by_pk(pk_columns: {id: $id}, _set: {name: $name, stock: $stock, price: $price}) {
+      name
+      price
+      stock
+      id
+    }
   }
-}
 `;
 
 export const UPDATE_PRODUCT_STOCK = gql`
@@ -131,8 +143,8 @@ export const CLEAR_CART = gql`
 `;
 
 export const CREATE_ORDER = gql`
-  mutation CreateOrder {
-    insert_orders_one(object: {}) {
+  mutation CreateOrder($user_id: uuid!) {
+    insert_orders_one(object: { user_id: $user_id }) {
       id
     }
   }
