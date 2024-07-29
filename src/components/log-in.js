@@ -6,7 +6,8 @@ import bcrypt from 'bcryptjs';
 
 const LogIn = ({ setAuthToken }) => {
   const [formData, setFormData] = useState({ username: '', password: '' });
-  const [loginUser, { data: loginData }] = useLazyQuery(GET_USER);
+  const [loginUser, { data: loginData, error: loginError }] = useLazyQuery(GET_USER);
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -16,6 +17,11 @@ const LogIn = ({ setAuthToken }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { username, password } = formData;
+
+    if (!username || !password) {
+      setErrorMessage('Please fill in both fields');
+      return;
+    }
 
     try {
       loginUser({ variables: { username } });
@@ -53,10 +59,10 @@ const LogIn = ({ setAuthToken }) => {
                 break;
             }
           } else {
-            alert('Invalid credentials');
+            setErrorMessage('Invalid username or password');
           }
         } else {
-          alert('User not found');
+          setErrorMessage('username or password is incorrect');
         }
       }
     };
@@ -92,6 +98,9 @@ const LogIn = ({ setAuthToken }) => {
               required
             />
           </div>
+          {errorMessage && (
+            <p className="text-red-500 mb-4">{errorMessage}</p>
+          )}
           <button type="submit" className='bg-lime-600 px-6 py-2 text-white text-center hover:bg-lime-500'>
             Login
           </button>

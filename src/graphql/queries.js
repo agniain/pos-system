@@ -14,21 +14,20 @@ export const GET_USER = gql`
 `
 
 export const GET_PRODUCTS = gql`
-  query GetProduct($limit: Int, $offset: Int) {
-  products(limit: $limit, offset: $offset order_by: {id: asc}) {
-    id
-    name
-    price
-    stock
-  }
-  products_aggregate {
-    aggregate {
-      count
+  query GetProducts($limit: Int, $offset: Int, $search: String) {
+    products_aggregate(where: {name: {_ilike: $search}}) {
+      aggregate {
+        count
+      }
+    }
+    products(where: {name: {_ilike: $search}}, limit: $limit, offset: $offset) {
+      id
+      name
+      price
+      stock
     }
   }
-}
-
-`;
+`
 
 export const GET_CART_ITEMS = gql`
   query getCartItems {
@@ -61,27 +60,45 @@ export const GET_TOTAL_CART_PRICE = gql`
 `;
 
 export const GET_ORDER_HISTORY = gql`
-  query GetOrderHistory($startDate: timestamptz, $endDate: timestamptz) {
-    orders(where: {order_date: {_gte: $startDate, _lte: $endDate}}) {
+  query GetOrderHistory($startDate: timestamptz!, $endDate: timestamptz!, $limit: Int!, $offset: Int!) {
+    orders(
+      where: { order_date: { _gte: $startDate, _lte: $endDate } }
+      limit: $limit
+      offset: $offset
+      order_by: { order_date: desc }
+    ) {
       id
       order_date
       user {
         full_name
       }
       order_details {
+        product_id
+        quantity
         product {
           name
           price
         }
-        quantity
+      }
+    }
+    orders_aggregate(
+      where: { order_date: { _gte: $startDate, _lte: $endDate } }
+    ) {
+      aggregate {
+        count
       }
     }
   }
 `;
 
 export const GET_PRODUCT_SALES_AND_STOCK = gql`
-  query GetAllProductsWithQuantity {
-    products (order_by: {name: asc}) {
+  query GetProductSalesAndStock($limit: Int, $offset: Int, $search: String) {
+    products_aggregate(where: { name: { _ilike: $search } }) {
+      aggregate {
+        count
+      }
+    }
+    products(where: { name: { _ilike: $search } }, limit: $limit, offset: $offset, order_by: { name: asc }) {
       id
       name
       price

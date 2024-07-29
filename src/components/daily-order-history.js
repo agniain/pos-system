@@ -10,11 +10,16 @@ const OrderHistory = () => {
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
   const [pdfUrl, setPdfUrl] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const limit = 15;
+  const offset = (currentPage - 1) * limit;
 
   const { data, loading, error, refetch } = useQuery(GET_ORDER_HISTORY, {
     variables: {
-      startDate: startOfDay(today).toISOString(),
-      endDate: endOfDay(today).toISOString(),
+      startDate: startOfDay(startDate).toISOString(),
+      endDate: endOfDay(endDate).toISOString(),
+      limit,
+      offset,
     },
   });
 
@@ -22,11 +27,16 @@ const OrderHistory = () => {
     refetch({
       startDate: startOfDay(startDate).toISOString(),
       endDate: endOfDay(endDate).toISOString(),
+      limit,
+      offset,
     });
-  }, [startDate, endDate, refetch]);
+  }, [startDate, endDate, currentPage, refetch]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
+
+  const totalOrders = data.orders_aggregate.aggregate.count;
+  const totalPages = Math.ceil(totalOrders / limit);
 
   const calculateTotal = (orderDetails) => {
     return orderDetails.reduce((total, item) => total + item.product.price * item.quantity, 0);
@@ -82,6 +92,18 @@ const OrderHistory = () => {
     </Document>
   );
 
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
     <div className="w-5/6 p-4">
       <h2 className="text-2xl text-amber-900 font-bold">Order History</h2>
@@ -116,7 +138,7 @@ const OrderHistory = () => {
         <tbody className="text-amber-900">
           {data.orders.map((order, index) => (
             <tr key={order.id}>
-              <td className="border p-2 border-lime-700">{index + 1}</td>
+              <td className="border p-2 border-lime-700">{(currentPage - 1) * limit + index + 1}</td>
               <td className="border p-2 border-lime-700">
                 {format(new Date(order.order_date), 'dd/MM/yyyy')}
               </td>
@@ -154,6 +176,23 @@ const OrderHistory = () => {
           ))}
         </tbody>
       </table>
+      <div className="flex justify-between mt-4">
+        <button
+          onClick={handlePrevPage}
+          disabled={currentPage === 1}
+          className="bg-white border border-lime-500 text-lime-700 p-2 hover:bg-lime-400"
+        >
+          Previous
+        </button>
+        <span className="self-center">Page {currentPage} of {totalPages}</span>
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+          className="bg-white border border-lime-500 text-lime-700 p-2 hover:bg-lime-400"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

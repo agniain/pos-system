@@ -4,10 +4,20 @@ import { GET_PRODUCT_SALES_AND_STOCK } from '../graphql/queries';
 import { ADD_PRODUCT, UPDATE_PRODUCT_STOCK } from '../graphql/mutations';
 
 const Products = () => {
-  const { data, loading, error, refetch } = useQuery(GET_PRODUCT_SALES_AND_STOCK);
-  const [newProduct, setNewProduct] = useState({ name: '', price: '', stock: '' });
-  const [updateStock] = useMutation(UPDATE_PRODUCT_STOCK);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState([]);
+  const [newProduct, setNewProduct] = useState({ name: '', price: '', stock: '' });
+
+  const { data, loading, error, refetch } = useQuery(GET_PRODUCT_SALES_AND_STOCK, {
+    variables: {
+      limit: 15,
+      offset: (currentPage - 1) * 15,
+      search: `%${searchQuery}%`,
+    },
+  });
+
+  const totalPages = data ? Math.ceil(data.products_aggregate.aggregate.count / 15) : 1;
 
   useEffect(() => {
     if (data) {
@@ -36,6 +46,8 @@ const Products = () => {
     },
   });
 
+  const [updateStock] = useMutation(UPDATE_PRODUCT_STOCK);
+
   const handleAddProduct = (e) => {
     e.preventDefault();
     addProduct({
@@ -61,6 +73,12 @@ const Products = () => {
     } catch (error) {
       console.error('Error updating stock:', error);
     }
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1); // Reset to first page on new search
+    refetch();
   };
 
   if (loading) return <p>Loading...</p>;
@@ -97,6 +115,13 @@ const Products = () => {
         <button type="submit" className="bg-amber-700 text-sm text-white p-2 hover:bg-orange-600">Add Product</button>
       </form>
       <h2 className="my-5 text-2xl text-amber-900 font-bold">Product List</h2>
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={handleSearchChange}
+        placeholder="Search Products"
+        className="border p-2 mb-4 w-full"
+      />
       <table className="min-w-full border-collapse">
         <thead>
           <tr className="bg-lime-600 text-white">
@@ -137,6 +162,23 @@ const Products = () => {
           ))}
         </tbody>
       </table>
+      <div className="flex justify-between items-center mt-5 mb-10 py-5">
+        <button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+          className="bg-white border border-lime-500 text-lime-700 p-2 hover:bg-lime-400"
+        >
+          Previous
+        </button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+          className="bg-white border border-lime-500 text-lime-700 p-2 hover:bg-lime-400"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

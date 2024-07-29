@@ -7,9 +7,14 @@ import { ADD_AND_CREATE_CART, ADD_TO_CART, UPDATE_CART_ITEM_QUANTITY } from '../
 const ProductSection = ({ refetchCart, refetchTotalCartPrice, cartData }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [quantities, setQuantities] = useState({});
 
   const { data: productsData } = useQuery(GET_PRODUCTS, {
-    variables: { limit: 9, offset: (currentPage - 1) * 9 },
+    variables: { 
+      limit: 9, 
+      offset: (currentPage - 1) * 9,
+      search: `%${searchQuery}%`,
+    },
   });
 
   const totalPages = productsData ? Math.ceil(productsData.products_aggregate.aggregate.count / 9) : 1;
@@ -38,7 +43,17 @@ const ProductSection = ({ refetchCart, refetchTotalCartPrice, cartData }) => {
     },
   });
 
+  const handleQuantityChange = (productId, quantity) => {
+    const validQuantity = Math.max(0, parseInt(quantity, 10));
+    setQuantities({
+      ...quantities,
+      [productId]: isNaN(validQuantity) ? 0 : validQuantity,
+    });
+  };
+
   const handleAddToCart = (product) => {
+    const quantity = parseInt(quantities[product.id], 10) || 0;
+
     if (cartData?.cart.length) {
       const cart = cartData.cart[0];
       const cartProduct = cart.cart_products.find((item) => item.product_id === product.id);
@@ -48,7 +63,7 @@ const ProductSection = ({ refetchCart, refetchTotalCartPrice, cartData }) => {
         updateCartItemQuantity({
           variables: {
             _eq: cartProduct.id,
-            quantity: 1,
+            quantity,
           },
         });
       } else {
@@ -57,7 +72,7 @@ const ProductSection = ({ refetchCart, refetchTotalCartPrice, cartData }) => {
           variables: {
             cart_id: cart.id,
             product_id: product.id,
-            quantity: 1,
+            quantity,
           },
         });
       }
@@ -66,7 +81,7 @@ const ProductSection = ({ refetchCart, refetchTotalCartPrice, cartData }) => {
       createCartAndAddProduct({
         variables: {
           product_id: product.id,
-          quantity: 1,
+          quantity,
         },
       });
     }
@@ -96,15 +111,24 @@ const ProductSection = ({ refetchCart, refetchTotalCartPrice, cartData }) => {
             />
             <h3 className="font-semibold text-center">{product.name}</h3>
             <div className="flex">
-              <p className="text-sm ">Rp {product.price}</p>
+              <p className="text-sm">Rp {product.price}</p>
               <p className="text-sm ml-auto">Stock: {product.stock}</p>
             </div>
-            <button
-              className="bg-amber-700 text-white text-sm mt-2 w-full px-7 py-1 hover:bg-orange-500"
-              onClick={() => handleAddToCart(product)}
-            >
-              <ShoppingCartIcon />
-            </button>
+            <div className="flex items-center mt-2">
+              <input
+                type="number"
+                value={quantities[product.id] || 0}
+                onChange={(e) => handleQuantityChange(product.id, e.target.value)}
+                className="border rounded-md p-2 w-1/2"
+                min="0"
+              />
+              <button
+                className="bg-amber-700 text-white text-sm ml-2 w-1/2 px-7 py-1 hover:bg-orange-500"
+                onClick={() => handleAddToCart(product)}
+              >
+                <ShoppingCartIcon />
+              </button>
+            </div>
           </div>
         ))}
       </div>
