@@ -125,7 +125,7 @@ const ProductSection = ({ refetchCart, refetchTotalCartPrice, cartData }) => {
                 value={quantities[product.id] || 0}
                 onChange={(e) => handleQuantityChange(product.id, e.target.value)}
                 className="border rounded-md p-2 w-1/2"
-                min="1"
+                min="0"
               />
               <button
                 className="bg-amber-700 text-white text-sm ml-2 w-1/2 px-7 py-1 hover:bg-orange-500"
